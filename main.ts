@@ -25,19 +25,21 @@ function A (mySprite: Sprite) {
     mySprite.vy += thrustY
     mySprite.startEffect(effects.fire, 500)
 }
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    Ship.setPosition(randint(0, 160), randint(0, 120))
+    transformSprites.changeRotation(Ship, randint(-360, 360))
+})
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     fireTorpedo(Ship)
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     rotatePlayer(Ship, -30)
 })
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Projectile, function (sprite, otherSprite) {
-    sprite.destroy(effects.disintegrate, 500)
-    otherSprite.destroy(effects.disintegrate, 500)
-    info.changeScoreBy(1)
-})
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     rotatePlayer(Ship, 30)
+})
+info.onLifeZero(function () {
+    game.over(false, effects.melt)
 })
 function fireTorpedo (playerSprite: Sprite) {
     // 0 degrees is north; adjust to correct polar angle.
@@ -68,6 +70,18 @@ function fireTorpedo (playerSprite: Sprite) {
         `, playerSprite, torpedoVx, torpedoVy)
     music.pewPew.play()
 }
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
+    sprite.destroy(effects.disintegrate, 500)
+    otherSprite.destroy(effects.disintegrate, 500)
+    info.changeScoreBy(1)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
+    info.changeLifeBy(-1)
+    sprite.startEffect(effects.ashes, 500)
+    otherSprite.destroy(effects.disintegrate, 500)
+    scene.cameraShake(4, 500)
+    pause(3000)
+})
 let projectile2: Sprite = null
 let projectile: Sprite = null
 let torpedoDy = 0
@@ -83,6 +97,7 @@ let thrustDir = 0
 let TORPEDO_SPEED = 0
 let THRUSTER_VELOCITY = 0
 let Ship: Sprite = null
+effects.starField.startScreenEffect()
 Ship = sprites.create(img`
     . . . . . . . 7 7 . . . . . . . 
     . . . . . . . 7 7 . . . . . . . 
@@ -214,6 +229,7 @@ img`
 ]
 THRUSTER_VELOCITY = 10
 TORPEDO_SPEED = 100
+info.setLife(3)
 forever(function () {
     if (Ship.x < 0 || Ship.x > 160) {
         if (Ship.x < 50) {
@@ -232,4 +248,5 @@ forever(function () {
 })
 game.onUpdateInterval(500, function () {
     projectile2 = sprites.createProjectileFromSide(list[randint(0, list.length - 1)], randint(-50, 50), randint(-50, 50))
+    projectile2.setKind(SpriteKind.Enemy)
 })
