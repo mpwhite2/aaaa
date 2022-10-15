@@ -1,5 +1,5 @@
 {
-    "name": "asteroids2",
+    "name": "asteroids3",
     "version": "3.0.0",
     "description": "",
     "dependencies": {
@@ -7,7 +7,8 @@
         "pxt-arcade-image-transform": "github:robo-technical-group/pxt-arcade-image-transform#v1.0.5",
         "animation": "*",
         "pxt-arcade-info-screens": "github:robo-technical-group/pxt-arcade-info-screens#v1.0.13",
-        "sprite-scaling": "*"
+        "sprite-scaling": "*",
+        "pxt-status-bar": "github:jwunderl/pxt-status-bar#v0.4.1"
     },
     "files": [
         "main.blocks",
