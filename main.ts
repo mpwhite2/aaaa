@@ -10,22 +10,17 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Powerup, function (sprite, other
 function rotatePlayer (playerSprite: Sprite, direction: number) {
     transformSprites.changeRotation(playerSprite, direction)
 }
-controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    A(Ship)
-})
 function A (mySprite: Sprite) {
     // Zero rotation represents north; adjust to correct polar angle.
     thrustDir = transformSprites.getRotation(mySprite) - 90
     thrustDirRads = thrustDir * 3.1416 / 180
     thrustX = THRUSTER_VELOCITY * Math.cos(thrustDirRads)
     thrustY = THRUSTER_VELOCITY * Math.sin(thrustDirRads)
-    mySprite.vx += thrustX
-    mySprite.vy += thrustY
-    mySprite.startEffect(effects.fire, 500)
+    mySprite.ax = thrustX
+    mySprite.ay = thrustY
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     Ship.setPosition(randint(0, 160), randint(0, 120))
-    transformSprites.changeRotation(Ship, randint(-360, 360))
 })
 sprites.onOverlap(SpriteKind.Smallenemy, SpriteKind.Prox, function (sprite, otherSprite) {
     music.sonar.play()
@@ -56,6 +51,11 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Smallenemy, function (sprite
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     rotatePlayer(Ship, 30)
 })
+function IMG (myImage: Image) {
+    r = transformSprites.getRotation(Ship)
+    Ship.setImage(myImage)
+    transformSprites.rotateSprite(Ship, r)
+}
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     Ship.setVelocity(0, 0)
 })
@@ -138,6 +138,7 @@ let torpedoVy = 0
 let torpedoVx = 0
 let torpedoDirRads = 0
 let torpedoDir = 0
+let r = 0
 let list = 0
 let thrustY = 0
 let thrustX = 0
@@ -149,24 +150,7 @@ let Small_asteroids: Image[] = []
 let statusbar: StatusBarSprite = null
 let Ship: Sprite = null
 effects.starField.startScreenEffect()
-Ship = sprites.create(img`
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . 7 . . . . . . . 
-    . . . . . . . . 2 . . . . . . . 
-    . . . . . . . 2 2 2 . . . . . . 
-    . . . . . . . 2 2 2 . . . . . . 
-    . . . . . . 2 2 2 2 2 . . . . . 
-    . . . . . 2 2 2 2 2 2 2 . . . . 
-    `, SpriteKind.Player)
+Ship = sprites.create(assets.image`S1`, SpriteKind.Player)
 statusbar = statusbars.create(160, 6, StatusBarKind.Energy)
 statusbar.positionDirection(CollisionDirection.Bottom)
 statusbar.setColor(7, 2)
@@ -504,6 +488,16 @@ forever(function () {
         }
     }
     music.playMelody("E E F - F D A C ", 120)
+})
+forever(function () {
+    if (controller.up.isPressed()) {
+        A(Ship)
+        IMG(assets.image`S2`)
+    } else {
+        Ship.ax = 0
+        Ship.ay = 0
+        IMG(assets.image`S1`)
+    }
 })
 game.onUpdateInterval(10000, function () {
     if (Math.percentChance(50)) {
