@@ -25,14 +25,11 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 sprites.onOverlap(SpriteKind.Smallenemy, SpriteKind.Prox, function (sprite, otherSprite) {
     music.sonar.play()
 })
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    fireTorpedo(Ship)
-})
 sprites.onOverlap(SpriteKind.Enemy, SpriteKind.Prox, function (sprite, otherSprite) {
     music.sonar.play()
 })
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    rotatePlayer(Ship, -30)
+controller.down.onEvent(ControllerButtonEvent.Released, function () {
+    Ship.setVelocity(0, 0)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite2, otherSprite2) {
     sprite2.startEffect(effects.ashes, 500)
@@ -48,19 +45,16 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Smallenemy, function (sprite
     otherSprite.destroy(effects.disintegrate, 500)
     info.changeScoreBy(1)
 })
-controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    rotatePlayer(Ship, 30)
-})
 function IMG (myImage: Image) {
     r = transformSprites.getRotation(Ship)
     Ship.setImage(myImage)
     transformSprites.rotateSprite(Ship, r)
 }
-controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    Ship.setVelocity(0, 0)
-})
 info.onLifeZero(function () {
     game.over(false, effects.melt)
+})
+controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
+    fireTorpedo(Ship)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
     otherSprite.destroy(effects.confetti, 500)
@@ -149,8 +143,26 @@ let THRUSTER_VELOCITY = 0
 let Small_asteroids: Image[] = []
 let statusbar: StatusBarSprite = null
 let Ship: Sprite = null
+controller.setRepeatDefault(0,300)
 effects.starField.startScreenEffect()
-Ship = sprites.create(assets.image`S1`, SpriteKind.Player)
+Ship = sprites.create(img`
+    . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . 
+    . . . . . . . 7 . . . . . . . 
+    . . . . . . . 2 . . . . . . . 
+    . . . . . . . 2 . . . . . . . 
+    . . . . . . 2 2 2 . . . . . . 
+    . . . . . 2 2 2 2 2 . . . . . 
+    . . . . 2 2 2 2 2 2 2 . . . . 
+    . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . 
+    `, SpriteKind.Player)
 statusbar = statusbars.create(160, 6, StatusBarKind.Energy)
 statusbar.positionDirection(CollisionDirection.Bottom)
 statusbar.setColor(7, 2)
@@ -464,13 +476,21 @@ img`
     . . . . . . . . . . . . . . . . 
     `
 ]
-THRUSTER_VELOCITY = 5
+THRUSTER_VELOCITY = 10
 TORPEDO_SPEED = 100
 let Level = 1700
 info.setLife(5)
 game.onUpdateInterval(Level, function () {
     projectile2 = sprites.createProjectileFromSide(Big_asteroids[randint(0, Big_asteroids.length - 1)], randint(-50, 50), randint(-50, 50))
     projectile2.setKind(SpriteKind.Enemy)
+})
+game.onUpdateInterval(1, function () {
+    if (controller.right.isPressed()) {
+        rotatePlayer(Ship, 3)
+    }
+    if (controller.left.isPressed()) {
+        rotatePlayer(Ship, -3)
+    }
 })
 forever(function () {
     if (Ship.x < 0 || Ship.x > 160) {
@@ -492,11 +512,45 @@ forever(function () {
 forever(function () {
     if (controller.up.isPressed()) {
         A(Ship)
-        IMG(assets.image`S2`)
+        IMG(img`
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . 7 . . . . . . . 
+            . . . . . . . 2 . . . . . . . 
+            . . . . . . . 2 . . . . . . . 
+            . . . . . . 2 2 2 . . . . . . 
+            . . . . . 2 2 2 2 2 . . . . . 
+            . . . . 2 2 2 2 2 2 2 . . . . 
+            . . . . . . 2 4 2 . . . . . . 
+            . . . . . . . 5 . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            `)
     } else {
         Ship.ax = 0
         Ship.ay = 0
-        IMG(assets.image`S1`)
+        IMG(img`
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . 7 . . . . . . . 
+            . . . . . . . 2 . . . . . . . 
+            . . . . . . . 2 . . . . . . . 
+            . . . . . . 2 2 2 . . . . . . 
+            . . . . . 2 2 2 2 2 . . . . . 
+            . . . . 2 2 2 2 2 2 2 . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . 
+            `)
     }
 })
 game.onUpdateInterval(10000, function () {
